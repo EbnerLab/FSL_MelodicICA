@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#use to run from local workstation
+
+for i in [subjects separated by a single space]
+do
+
+#reorients T1 MPRAGE to standard space
+    fsl5.0-fslreorient2std $i/T1/T1.nii T1_reorient.nii
+ 
+#performs rough brain extraction 
+    fsl5.0-bet $i/T1/T1_reorient.nii $i/T1/T1_brain.nii -f .1 -B -R
+
+#performs melodic independent component analysis and creates report
+    fsl5.0-melodic -i $i/rsBOLD/rsBOLD -o $i/FSL/melodics/ --report
+
+#registers melodic ica data to MNI space    
+    fsl5.0-flirt -in $i/FSL/melodics.ica -ref $FSLDIR/data/standard/MNI152_T1_2mm -applyxfm -usesqform -out $i/FSL/melodics_reg
+
+done
